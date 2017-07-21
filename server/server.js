@@ -1,67 +1,27 @@
-const mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-// setting mongoose to use promises
-mongoose.Promise = global.Promise;
-// connecting to our database
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+const { mongoose } = require('./db/mongoose');
+const { Todo } = require('./models/todo');
+const { User } = require('./models/user');
 
-// creating our model
-const Todo = mongoose.model('Todo', {
-  text: {
-    type: String,
-    required: true, // requires text property to exist
-    minlength: 1, // sets minimal length of string
-    trim: true // trims whitespaces on start and end of string
-  },
-  completed: {
-    type: Boolean,
-    default: false // set default value
-  },
-  completedAt: {
-    type: Number,
-    default: null
-  }
+const app = express();
+
+app.use(bodyParser.json());
+
+app.post('/todos', (req, res) => {
+  // console.log(req.body);
+  const todo = new Todo({
+    text: req.body.text
+  });
+
+  todo.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
 });
 
-// creating our instances
-const newTodo = new Todo({
-  text: 'Cook dinner'
-});
-
-const makeTodo = new Todo({
-  text: 'Make new Todo',
-  completed: true,
-  completedAt: Date.now()
-});
-
-// saving our instances
-newTodo.save().then((doc) => {
-  console.log('Saved Todo', doc);
-}, (err) => {
-  console.log('Unable to save todo', err);
-});
-
-makeTodo.save().then((doc) =>{
-  console.log('New Todo is saved', JSON.stringify(doc, undefined, 2));
-}, (err) => {
-  console.log('Unable to save todo', err);
-});
-
-const User = mongoose.model('User', {
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 1
-  }
-});
-
-const newUser = new User({
-  email: 'u.hanchar@gmail.com'
-});
-
-newUser.save().then((doc) => {
-  console.log('New user registered', doc);
-}, (err) => {
-  console.log('Unable to register new user', err);
+app.listen(3000, () => {
+  console.log('Started on port 3000');
 });
