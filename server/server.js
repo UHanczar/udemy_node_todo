@@ -64,4 +64,4 @@ newUser.save().then((doc) => {
   console.log('New user registered', doc);
 }, (err) => {
   console.log('Unable to register new user', err);
-})
+});
